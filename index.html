@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devoryn · unified workspace</title>
+    <!-- Font Awesome 6 (free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #f3f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        /* main dashboard card – combines all fragments */
+        .workspace {
+            max-width: 1440px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 40px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12), 0 10px 30px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* header */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 32px;
+            border-bottom: 1px solid #eef0f5;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-mark {
+            background: #1A1E2B;
+            color: white;
+            font-weight: 700;
+            font-size: 22px;
+            letter-spacing: -0.5px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            background: linear-gradient(145deg, #20243a, #151928);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        .logo-mark span { transform: scale(1.2); display: inline-block; }
+        .logo-text {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1A1E2B;
+            letter-spacing: -0.3px;
+        }
+        .logo-text span { color: #4f46e5; font-weight: 700; }
+        .workspace-badge {
+            background: #f0f2f7;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2c3149;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .workspace-badge i { color: #4f46e5; }
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .avatar {
+            background: #2d314e;
+            width: 48px;
+            height: 48px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            background: linear-gradient(135deg, #4f46e5, #7a5fff);
+        }
+
+        /* main content with sidebar + panels */
+        .main-layout {
+            display: flex;
+            flex: 1;
+        }
+
+        /* ---------- SIDEBAR (unified from all images) ---------- */
+        .sidebar {
+            width: 260px;
+            background: #f9fafc;
+            padding: 32px 16px;
+            border-right: 1px solid #eef0f5;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+        .nav-section {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 18px;
+            border-radius: 16px;
+            color: #4b5169;
+            font-weight: 500;
+            font-size: 15px;
+            transition: 0.2s;
+            cursor: default;
+        }
+        .nav-item i { width: 22px; font-size: 1.2rem; color: #6d738c; }
+        .nav-item.active {
+            background: #ffffff;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.02);
+            color: #1A1E2B;
+            font-weight: 600;
+        }
+        .nav-item.active i { color: #4f46e5; }
+        .nav-item:not(.active):hover { background: #f0f2f7; }
+
+        .system-resources {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 20px 18px;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.02);
+            border: 1px solid #edf0f7;
+            margin-top: 10px;
+        }
+        .resource-item {
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #363d5a;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e6eaf2;
+        }
+        .resource-item:last-child { border: none; }
+        .resource-item i { color: #4f46e5; width: 22px; }
+        .badge-outdated { background: #fee2e2; color: #b91c1c; font-size: 11px; padding: 3px 8px; border-radius: 30px; margin-left: 8px; }
+        .badge-synced { background: #dcfce7; color: #166534; }
+
+        /* admin tag */
+        .admin-tag {
+            margin-top: 20px;
+            color: #7f85a2;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ---------- RIGHT CONTENT (grid of fragments) ---------- */
+        .content-panel {
+            flex: 1;
+            padding: 32px 28px;
+            background: #ffffff;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+            overflow-y: auto;
+        }
+
+        /* universal card style */
+        .card {
+            background: #fbfcff;
+            border-radius: 28px;
+            padding: 22px 20px;
+            border: 1px solid #edf2f9;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.02);
+            transition: all 0.2s;
+        }
+        .card:hover { box-shadow: 0 12px 24px rgba(79,70,229,0.06); border-color: #e0e7ff; }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .card-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #21273e;
+            letter-spacing: -0.2px;
+        }
+        .card-header i { color: #8f96b5; }
+
+        /* workload (fragment 1) */
+        .workload-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .stat-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .stat-label {
+            width: 40px;
+            font-weight: 500;
+            color: #38405f;
+        }
+        .bar-bg {
+            flex: 1;
+            height: 10px;
+            background: #e7ebf5;
+            border-radius: 20px;
+        }
+        .bar-fill {
+            height: 10px;
+            border-radius: 20px;
+            background: linear-gradient(90deg, #4f46e5, #7b73ff);
+        }
+
+        .project-status-list {
+            list-style: none;
+            margin-top: 6px;
+        }
+        .project-status-list li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #edf0f7;
+        }
+        .badge-status {
+            background: #e9ecf5;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 12px;
+        }
+
+        .review-backlog {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+        }
+        .reviewer-avatar {
+            background: #e4e7f2;
+            width: 40px;
+            height: 40px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #2a3152;
+        }
+
+        /* weekly milestones */
+        .milestone-item {
+            background: #ffffff;
+            padding: 10px 14px;
+            border-radius: 16px;
+            margin-bottom: 8px;
+            border: 1px solid #eef3fe;
+        }
+
+        /* Projects overview (from 858) */
+        .project-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #edf2f9;
+        }
+        .project-tag {
+            font-size: 13px;
+            background: #e8ecf5;
+            padding: 4px 10px;
+            border-radius: 30px;
+        }
+        .timeline-mini {
+            display: flex;
+            gap: 6px;
+            font-size: 12px;
+            color: #4a5474;
+        }
+
+        /* messages preview (from 029) */
+        .message-thread {
+            margin: 12px 0;
+            background: #f7f9fe;
+            border-radius: 20px;
+            padding: 16px;
+        }
+        .message-author {
+            font-weight: 600;
+        }
+
+        /* analytics numbers */
+        .kpi-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin: 6px 0;
+        }
+
+        /* responsive adjustments */
+        .content-panel {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .span-2 { grid-column: span 2; }
+        .span-3 { grid-column: span 3; }
+
+        /* extra polish */
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            background: #f1f4fc;
+            border-radius: 40px;
+            padding: 6px;
+            width: fit-content;
+        }
+        .filter-chip {
+            background: white;
+            border-radius: 30px;
+            padding: 6px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        hr { border: 0.5px solid #edf2f9; margin: 16px 0; }
+
+        /* sign in reminder (tiny from 377) integrated as subtle alert */
+        .signin-reminder {
+            background: #f0f3fe;
+            border-radius: 18px;
+            padding: 10px 16px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #2f3b6b;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+<div class="workspace">
+    <!-- top bar with "Hi Devoryn!" + login hint (fragments 961 & 377) -->
+    <div class="top-bar">
+        <div class="logo-area">
+            <div class="logo-mark"><span>D</span></div>
+            <div class="logo-text">DEVORYN<span>.</span></div>
+        </div>
+        <div class="workspace-badge"><i class="fas fa-hand-sparkles"></i> Hi, Devoryn! 🎉</div>
+        <div class="user-profile">
+            <div style="font-size: 14px; color:#4b4f6e;">Admin</div>
+            <div class="avatar">DV</div>
+        </div>
+    </div>
+
+    <!-- main body with sidebar + card grid -->
+    <div class="main-layout">
+        <!-- left sidebar (includes all navigation + system resources) -->
+        <div class="sidebar">
+            <div class="nav-section">
+                <div class="nav-item active"><i class="fas fa-th-large"></i> Dashboard</div>
+                <div class="nav-item"><i class="fas fa-chart-pie"></i> Analytics</div>
+                <div class="nav-item"><i class="fas fa-diagram-project"></i> Projects</div>
+                <div class="nav-item"><i class="fas fa-users"></i> Team</div>
+                <div class="nav-item"><i class="fas fa-file-alt"></i> Reports</div>
+                <div class="nav-item"><i class="fas fa-comment-dots"></i> Messages</div>
+                <div class="nav-item"><i class="fas fa-sliders-h"></i> Settings</div>
+                <div class="nav-item"><i class="fas fa-sign-out-alt"></i> Logout</div>
+            </div>
+
+            <!-- System resources (from 961) -->
+            <div class="system-resources">
+                <div style="font-weight:600; margin-bottom:12px;">⚙️ System Resources</div>
+                <div class="resource-item"><i class="fab fa-figma"></i> Finma Desinn System <span class="badge-outdated">v4.1 (outdated)</span></div>
+                <div class="resource-item"><i class="fas fa-layer-group"></i> Brand Asset Library <span class="badge-synced">Synced</span></div>
+                <div class="resource-item"><i class="fas fa-cloud"></i> Figma v4.2 <span style="color:#4f46e5;">update ready</span></div>
+                <div class="resource-item"><i class="fas fa-plug"></i> Sigma • Trelo • Miro</div>
+                <div class="admin-tag"><i class="fas fa-shield-alt"></i> Devoryn · Admin</div>
+            </div>
+
+            <!-- tiny sign-in reminder (IMG_377 style) -->
+            <div class="signin-reminder">
+                <i class="fas fa-lock-open" style="color:#4f46e5;"></i>
+                <span>Please Log In to your Workspace (you're already in ✅)</span>
+            </div>
+        </div>
+
+        <!-- main card grid – all fragments composited -->
+        <div class="content-panel">
+            <!-- Card 1: Workload & availability (IMG_961) -->
+            <div class="card">
+                <div class="card-header"><h3>📊 Workload & availability</h3> <i class="fas fa-ellipsis-h"></i></div>
+                <div class="workload-stats">
+                    <div class="stat-row"><span class="stat-label">90%</span><div class="bar-bg"><div class="bar-fill" style="width:90%"></div></div><span>77%</span></div>
+                    <div class="stat-row"><span class="stat-label">50%</span><div class="bar-bg"><div class="bar-fill" style="width:50%"></div></div><span>75%</span></div>
+                    <div class="stat-row"><span class="stat-label">38%</span><div class="bar-bg"><div class="bar-fill" style="width:38%"></div></div><span>75%</span></div>
+                </div>
+                <hr>
+                <div><h4 style="font-size:14px; margin:8px 0;">Design project status</h4>
+                    <ul class="project-status-list">
+                        <li><span>Nebula CRM</span> <span class="badge-status">wireframing</span></li>
+                        <li><span>Prototyping</span> <span class="badge-status">user testing</span></li>
+                        <li><span>David</span> <span class="badge-status">review</span></li>
+                    </ul>
+                </div>
+                <div><h4 style="font-size:14px; margin:10px 0 6px;">Review backlog</h4>
+                    <div class="review-backlog"><span class="reviewer-avatar">B</span><span class="reviewer-avatar">D</span> <span style="margin-left:auto;color:#858ca8;">+2</span></div>
+                </div>
+            </div>
+
+            <!-- Card 2: weekly milestones / design deliverables (fragment 961) -->
+            <div class="card">
+                <div class="card-header"><h3>📌 Weekly milestones</h3><i class="fas fa-calendar-week"></i></div>
+                <div class="milestone-item">🎯 Design Deliverables · due Fri</div>
+                <div class="milestone-item">🧪 Design Protassental · in review</div>
+                <div class="milestone-item">📐 Design Deliverables · handoff</div>
+                <div class="milestone-item" style="border-left:3px solid #4f46e5;">🚧 Nebula user testing</div>
+            </div>
+
+            <!-- Card 3: Active projects (dashboard overview from 598) -->
+            <div class="card">
+                <div class="card-header"><h3>📁 Active projects</h3><i class="fas fa-rocket"></i></div>
+                <div>Nebula CRM <span style="float:right;">78%</span><div class="bar-bg" style="margin:6px 0;"><div class="bar-fill" style="width:78%"></div></div></div>
+                <div>Aethel Platform <span style="float:right;">94%</span><div class="bar-bg" style="margin:6px 0;"><div class="bar-fill" style="width:94%"></div></div></div>
+                <div>Orion App <span style="float:right;">52%</span><div class="bar-bg" style="margin:6px 0;"><div class="bar-fill" style="width:52%"></div></div></div>
+                <div style="margin-top:18px;"><i class="fas fa-tasks"></i> Task status: 45% in progress · 30% done · 25% backlog</div>
+            </div>
+
+            <!-- Card 4: Projects overview + timeline (from 858) — spans 2 cols for richness -->
+            <div class="card span-2">
+                <div class="card-header"><h3>📋 Projects overview · timeline</h3> <i class="fas fa-search"></i></div>
+                <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                    <div style="flex:2; min-width:200px;">
+                        <div class="project-row"><span><b>Nebula CRM Phase 2</b> <span class="project-tag">In Progress</span></span> <span class="timeline-mini"><i class="far fa-calendar"></i>05/3 · 01/13</span></div>
+                        <div class="project-row"><span><b>Aethel Platform</b> <span class="project-tag" style="background:#ffe4e2;">Blocked</span></span> <span>05/5 · 11/29</span></div>
+                        <div class="project-row"><span><b>Orion App MVP</b> <span class="project-tag" style="background:#dcfce7;">Completed</span></span> <span>01/20 · 11/29</span></div>
+                        <div class="project-row"><span><b>Project Polaris</b> <span class="project-tag">Completed</span></span> <span>05/9 · 11/29</span></div>
+                    </div>
+                    <div style="flex:1; border-left:1px solid #eef2f8; padding-left:20px;">
+                        <div class="filter-bar"><span class="filter-chip">All</span> <span class="filter-chip" style="background:#eef2ff;">Milestone</span></div>
+                        <p style="margin-top:20px;"><i class="fas fa-flag-checkered"></i> <b>Phase milestones:</b> Nebula, Aethel, Orion, Polaris</p>
+                        <button style="background:#4f46e5; border:none; color:white; border-radius:40px; padding:10px 24px; margin-top:16px; font-weight:500;"><i class="fas fa-plus"></i> New Project</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 5: Analytics insights (IMG_878) -->
+            <div class="card">
+                <div class="card-header"><h3>📈 Analytics insights</h3><i class="fas fa-chart-line"></i></div>
+                <div>User sessions <span style="float:right;">80k · 60k · 40k</span></div>
+                <div class="kpi-row"><span>🔍 Organic Search</span> <span>45%</span></div>
+                <div class="kpi-row"><span>📱 Social</span> <span>20%</span></div>
+                <div class="kpi-row"><span>📧 Email</span> <span>10%</span></div>
+                <div class="kpi-row"><span>🔁 Referral</span> <span>2.2x</span></div>
+                <hr>
+                <div><span>Total users: <b>2.1M</b></span> · 4m 32s avg</div>
+                <div>Conversion: 3.69% impressions → 0.36% clicks</div>
+                <div>ROAS: <strong>13.1K</strong></div>
+                <div style="margin-top:12px;">🔥 Top path: Home → Product → Checkout</div>
+            </div>
+
+            <!-- Card 6: Messages (from 029) -->
+            <div class="card">
+                <div class="card-header"><h3>💬 Messages · #design-feedback</h3><i class="fas fa-comment"></i></div>
+                <div class="message-thread">
+                    <div><span class="message-author">Anna</span> 7:39 PM</div>
+                    <div style="font-size:13px;">📎 uploaded Nebula CRM wireframes</div>
+                    <div style="margin-top:8px;"><span class="message-author">Ben</span> 7:57 PM – awesome, I'll look</div>
+                    <div><span class="message-author">Chloe</span> 7:38 PM – check color palette</div>
+                </div>
+                <div><i class="fas fa-user"></i> <b>Direct messages:</b> Anna, David, Marketing</div>
+                <div style="margin-top:10px;"><i class="fas fa-thumbtac
